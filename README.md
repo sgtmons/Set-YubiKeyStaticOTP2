@@ -79,5 +79,3 @@ Saving a **static OTP** or **static password** onto a YubiKey carries inherent s
 4. If your system restricts script execution, run the script with a temporary policy bypass:
    ```powershell
    powershell.exe -ExecutionPolicy Bypass -File .\Set-YubiKeyslot2OTPGUIv1.2.ps1
-
-
