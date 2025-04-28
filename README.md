@@ -44,6 +44,10 @@ Saving a **static OTP** or **static password** onto a YubiKey carries inherent s
 > While these mitigations reduce the risk, **the risk cannot be eliminated entirely**.
 
 ---
+## PowerShell Code
+- This code can be improved on a lot. I left it Initially verbose for now. 
+
+---
 
 ## ✨ Features
 
