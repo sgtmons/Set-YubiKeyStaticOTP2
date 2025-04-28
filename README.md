@@ -75,7 +75,9 @@ Saving a **static OTP** or **static password** onto a YubiKey carries inherent s
 
 1. Install YubiKey Manager (`ykman`) from Yubico's GitHub releases.
 2. Download this repository or the script file: `Set-YubiKeyslot2OTPGUIv1.2.ps1`
-3. Launch PowerShell as Administrator (if needed) and run:
+3. Open a PowerShell window as **Administrator** (if needed).
+4. If your system restricts script execution, run the script with a temporary policy bypass:
    ```powershell
-   .\Set-YubiKeyslot2OTPGUIv1.2.ps1
+   powershell.exe -ExecutionPolicy Bypass -File .\Set-YubiKeyslot2OTPGUIv1.2.ps1
+
 
