@@ -178,10 +178,10 @@ $form.Controls.Add($logBox)
 try {
     $scSvc = Get-CimInstance -ClassName Win32_Service -Filter "Name='SCardSvr'" -ErrorAction SilentlyContinue
     if ($scSvc -and $scSvc.StartMode -eq 'Disabled') {
-        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ⚠️ Smart Card service (SCardSvr) is disabled. Please set its Startup Type to Manual (Trigger Start) default.`r`n")
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Smart Card service (SCardSvr) is disabled. Please set its Startup Type to Manual (Trigger Start) default.`r`n")
     }
 } catch {
-    $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ⚠️ Failed to check Smart Card service status: $($_.Exception.Message)`r`n")
+    $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Failed to check Smart Card service status: $($_.Exception.Message)`r`n")
 }
 
 # Save button click handler
@@ -244,9 +244,9 @@ $saveButton.Add_Click({
         $proc.WaitForExit()
 
         if ($proc.ExitCode -eq 0) {
-            $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ✅ Static password saved successfully.`r`n")
+            $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Static password saved successfully.`r`n")
         } else {
-            $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ❌ ykman exited with code $($proc.ExitCode).`r`n")
+            $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ykman exited with code $($proc.ExitCode).`r`n")
         }
 
         if ($stdout) { $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] $stdout`r`n") }
@@ -274,9 +274,9 @@ if ($staticOTP) {
 $pasteButton.Add_Click({
     try {
         $passwordBox.Text = [System.Windows.Forms.Clipboard]::GetText()
-        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] 📋 Password pasted from clipboard.`r`n")
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Password pasted from clipboard.`r`n")
     } catch {
-        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ⚠️ Failed to paste password: $($_.Exception.Message)`r`n")
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Failed to paste password: $($_.Exception.Message)`r`n")
     }
 })
 
@@ -284,9 +284,9 @@ $pasteButton.Add_Click({
 $clearClipboardButton.Add_Click({
     try {
         [System.Windows.Forms.Clipboard]::Clear()
-        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] 🧹 Clipboard cleared by user.`r`n")
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Clipboard cleared by user.`r`n")
     } catch {
-        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ⚠️ Failed to clear clipboard (might be locked by another app): $($_.Exception.Message)`r`n")
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Failed to clear clipboard (might be locked by another app): $($_.Exception.Message)`r`n")
     }
 })
 
@@ -316,7 +316,7 @@ $infoButton.Add_Click({
             $logBox.SelectionStart = $logBox.GetFirstCharIndexFromLine(0)
             $logBox.ScrollToCaret()
         } else {
-            $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ❌ Failed to retrieve device info.`r`n")
+            $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Failed to retrieve device info.`r`n")
             $logBox.AppendText($infoOutput + "`r`n")
         }
     } catch {
