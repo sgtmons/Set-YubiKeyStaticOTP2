@@ -1,7 +1,6 @@
 # Set-YubiKeyStaticOTP
 
-A PowerShell GUI wrapper for securely setting a static OTP (one-time password) on a YubiKey slot using Yubico's `ykman` command-line tool.
-
+A PowerShell GUI wrapper for securely setting a static OTP (one-time password) on a YubiKey slot using Yubico's `ykman` command-line tool. 
 ---
 
 ## 📖 Full Description
@@ -9,6 +8,9 @@ A PowerShell GUI wrapper for securely setting a static OTP (one-time password) o
 **Set-YubiKeyStaticOTP** is a Windows PowerShell script that provides a graphical user interface (GUI) for setting a static OTP/password onto YubiKey slot 2 using the Yubico `ykman` CLI.
 
 This script is designed for administrators and security professionals who need a simple, controlled way to program static passwords onto YubiKeys without having to use complex CLI parameters.
+
+This use case is designed for a PAM (Privileged Access Management) user who is protected by MFA and uses a short-lived password that rotates frequently.
+Instead of copying the password to a notepad, writing it down, or carrying it on a USB stick, the user can check out their password from the PAM solution and write it to Slot 2 of their YubiKey. The YubiKey can then be used to input the password securely as a keyboard device. (SEE SECURITY NOTICE BELOW)
 
 The GUI allows you to:
 - Paste or type your password securely.
@@ -36,7 +38,8 @@ Saving a **static OTP** or **static password** onto a YubiKey carries inherent s
   - Always ensure accounts protected by static OTPs **also require Multi-Factor Authentication (MFA)** wherever possible.
   - **Regularly rotate passwords and OTPs** associated with YubiKeys used for static authentication.
   - **Physically secure** YubiKeys that store static credentials.
-  - Avoid using static OTPs for high-risk, highly privileged, or externally exposed accounts.
+  - **Train Users** To not leave YubiKeys plugged in and to notify if lost or stolen ASAP.
+  - Avoid using static OTPs for very high-risk, highly privileged, or externally exposed accounts.
 
 > While these mitigations reduce the risk, **the risk cannot be eliminated entirely**.
 
