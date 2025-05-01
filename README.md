@@ -7,7 +7,7 @@ A PowerShell GUI wrapper for securely setting a static OTP (one-time password) o
 
 **Set-YubiKeyStaticOTP** is a Windows PowerShell script that provides a graphical user interface (GUI) for setting a static OTP/password onto YubiKey slot 2 using the Yubico `ykman` CLI.
 
-This script is designed for administrators and security professionals who need a simple, controlled way to program static passwords onto YubiKeys without having to use complex CLI parameters.
+This script is designed for administrators who need a simple, controlled way to program static passwords onto YubiKeys without having to use complex CLI parameters.
 
 This use case is designed for a PAM (Privileged Access Management) user who is protected by MFA and uses a short-lived password that rotates frequently.
 Instead of copying the password to a notepad, writing it down, or carrying it on a USB stick, the user can check out their password from the PAM solution and write it to Slot 2 of their YubiKey. The YubiKey can then be used to input the password securely as a keyboard device. (SEE SECURITY NOTICE BELOW)
@@ -29,17 +29,18 @@ The script uses Windows Forms to create a clean, fixed-size interface, real-time
 
 Saving a **static OTP** or **static password** onto a YubiKey carries inherent security risks:
 
+- **Note: Saving a password in this slot wasn't the orginal intended purpose for this feature! Use at your own risk!**
 - **Static OTPs are triggered by a long press and are not PIN-protected.**  
-  Anyone with physical possession of the YubiKey could trigger the OTP without needing to know a PIN or password.
+  - Anyone with physical possession of the YubiKey could trigger the OTP without needing to know a PIN or password.
 
 - **Lost or stolen YubiKeys storing static credentials could lead to unauthorized access**, especially if the static value can be tied back to a user account or system.
 
 - **Mitigation best practices**:
-  - Always ensure accounts protected by static OTPs **also require Multi-Factor Authentication (MFA)** wherever possible.
-  - **Regularly rotate passwords and OTPs** associated with YubiKeys used for static authentication.
+  - Always ensure accounts **require Multi-Factor Authentication (MFA)** wherever possible.
+  - **Regularly rotate passwords** that are saved on YubiKeys used for static authentication.
   - **Physically secure** YubiKeys that store static credentials.
-  - **Train Users** To not leave YubiKeys plugged in and to notify if lost or stolen ASAP.
-  - Avoid using static OTPs for very high-risk, highly privileged, or externally exposed accounts.
+  - **Train users** to avoid leaving YubiKeys plugged in, and to notify IT immediately if a key is lost or stolen.
+  - Avoid saving OTPs or static passwords on YubiKeys used for very high-risk, highly privileged, or externally exposed accounts.
 
 > While these mitigations reduce the risk, **the risk cannot be eliminated entirely**.
 
