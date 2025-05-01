@@ -1,9 +1,9 @@
 <#
-.SCRIPTNAME    Set-YubiKeyslot2OTPGUIv1.2.ps1
-.DESCRIPTION   GUI wrapper for setting a static OTP on a YubiKey slot via ykman, passing the PIN via stdin, with real-time log updates. 
-.VERSION       1.2.0
+.SCRIPTNAME    Set-YubiKeyslot2OTPGUIv1.2.1.ps1
+.DESCRIPTION   GUI wrapper for setting a static OTP on a YubiKey slot via ykman, passing the PIN via stdin, with real-time log updates.
+.VERSION       1.2.1
 .AUTHOR        Michael Mercer https://github.com/sgtmons/Set-YubiKeyStaticOTP
-.LASTUPDATED   2025-04-26
+.LASTUPDATED   2025-05-01
 
 .NOTES
 - v0.5.0: Credit Kelly Seay for the initial script
@@ -26,21 +26,32 @@
     • Added Global Error trap for any uncaught fatal errors and added no YubiKey detected Windows Popup for Info button click handler.
 - v1.1.4: General Improvements
     • Added Smart Card service status check—warn in log box if it’s disabled on start.
-- v1.2: UI Improvements & Security enhancement
+- v1.2.0: UI Improvements & Security enhancement
     • Added Clear Clipboard Button
-	• Added Past Password Button    
+    • Added Past Password Button 
     • Added Clear password variable securely
-- Known Issues 1: 
+- v1.2.1: Input Validation
+    • Added logic to reject multiline clipboard paste
+    • Added visual popup for multiline errors
+    • Enforced max password length of 38 characters with popup warning
+    • Removed triming whitespace at front and end of password/otp string in case spaces were being used at beginning and end of string.
+    • Added pause briefly to allow ykman to initialize and display its password prompt, preventing dropped characters when piping the OTP Start-Sleep -Milliseconds 400
+    • Changed Past Password Button to Past & Save. It now pastes the password/otp and saves it to key. (Credit CJ for want this minor change)
+
+
+.KNOWN ISSUES
+- **Known Issue 1:**
     • The random char string -:6usM+mU2` o[_ will not save. It adds a -1 to the end.
     • Static OTP values that end with an underscore character (_) may result in an **unexpected trailing "-l" or similar keystroke** being output by the YubiKey. For example, -:6usM+mU2` o[_ will not save. It adds a -1 to the end.
     • This is likely caused by the YubiKey's keyboard emulation not properly releasing the Shift key when `_` is typed last (since `_` is Shift + `-` on US keyboards).
-    • Workaround: Avoid using _ or ` or ´ as the **final character** in static OTP values.
-- Known Issue 2:
-    • If you have multiple Yubi Keys plugged in you will get an error when trying to do anything. "ERROR: Multiple YubiKeys detected. Use --device SERIAL to specify which one to use."
-    • The use case for this was one yubikey. I might eventually have it pull all yubikey serials and have an input box for the user to specify. 
-    • Workaround: Just unplug all but one yubikey or if you need to work with multiple keys you can simply use ykman directly! 
-#>
+    • **Workaround:** Avoid using _ or ` or ´ as the **final character** in static OTP values.
 
+- **Known Issue 2:**
+    • If you have multiple Yubi Keys plugged in you will get an error when trying to do anything: "ERROR: Multiple YubiKeys detected. Use --device SERIAL to specify which one to use."
+    • The use case for this was one YubiKey. I might eventually have it pull all YubiKey serials and have an input box for the user to specify.
+    • **Workaround:** Just unplug all but one YubiKey or, if you need to work with multiple keys, use ykman directly!
+
+#>
 
 # Define ykman parameters
 $YkmanPath      = "ykman"
@@ -132,7 +143,7 @@ $form.Controls.Add($saveButton)
 
 # Paste Password button
 $pasteButton = New-Object System.Windows.Forms.Button
-$pasteButton.Text = "Paste Password"
+$pasteButton.Text = "Paste + Save"
 $pasteButton.Location = New-Object System.Drawing.Point(120,90)
 $pasteButton.Size = New-Object System.Drawing.Size(120,23)
 $form.Controls.Add($pasteButton)
@@ -184,17 +195,47 @@ try {
     $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Failed to check Smart Card service status: $($_.Exception.Message)`r`n")
 }
 
-# Save button click handler
-$saveButton.Add_Click({
+function Save-StaticPassword {
+    param (
+        [string]$staticOTP
+    )
+
     $logBox.Clear()
     $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Saving password to slot $OtpSlot...`r`n")
     [System.Windows.Forms.Application]::DoEvents()
 
-    $staticOTP = $passwordBox.Text.Trim()
+    if ($staticOTP -match '^\s|\s$') {
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Password has leading or trailing whitespace. Be sure this is intentional.`r`n")
+    }
+
     if (-not $staticOTP) {
         [System.Windows.Forms.MessageBox]::Show(
             "Please enter the admin password before saving.",
             "Input Required",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        )
+        return
+    }
+
+    # Multi-line check
+    if ($staticOTP -match "`r`n|\n|\r") {
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ERROR: Password contains multiple lines. Only single-line static OTPs are supported.`r`n")
+        [System.Windows.Forms.MessageBox]::Show(
+            "Only single-line static passwords are supported. Please remove line breaks.",
+            "Input Error",
+            [System.Windows.Forms.MessageBoxButtons]::OK,
+            [System.Windows.Forms.MessageBoxIcon]::Error
+        )
+        return
+    }
+
+    #Length check (Yubico recommends 38 chars max for static OTP)
+    if ($staticOTP.Length -gt 38) {
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] ERROR: Password is too long. Maximum length is 38 characters.`r`n")
+        [System.Windows.Forms.MessageBox]::Show(
+            "Password is too long. YubiKey static OTP supports a maximum of 38 characters.",
+            "Input Error",
             [System.Windows.Forms.MessageBoxButtons]::OK,
             [System.Windows.Forms.MessageBoxIcon]::Error
         )
@@ -223,7 +264,6 @@ $saveButton.Add_Click({
     }
 
     $saveButton.Enabled = $false
-
     $startInfo = New-Object System.Diagnostics.ProcessStartInfo
     $startInfo.FileName = $YkmanPath
     $startInfo.Arguments = "otp static --keyboard-layout $KeyboardLayout --force $OtpSlot"
@@ -236,6 +276,7 @@ $saveButton.Add_Click({
         $proc = New-Object System.Diagnostics.Process
         $proc.StartInfo = $startInfo
         $proc.Start() | Out-Null
+        Start-Sleep -Milliseconds 400
         $proc.StandardInput.WriteLine($staticOTP)
         $proc.StandardInput.Close()
 
@@ -254,33 +295,38 @@ $saveButton.Add_Click({
     } catch {
         $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Error: $($_.Exception.Message)`r`n")
     }
-    # Clear password variable securely
-if ($staticOTP) {
-    try {
-        # Overwrite $staticOTP contents manually
-        [System.Text.StringBuilder]$secureWipe = New-Object System.Text.StringBuilder($staticOTP.Length)
-        $staticOTP.ToCharArray() | ForEach-Object { [void]$secureWipe.Append('X') }
-        $staticOTP = $secureWipe.ToString()
-    } catch {
-        # If wiping fails, at least null it
-        $staticOTP = $null
+
+    if ($staticOTP) {
+        try {
+            [System.Text.StringBuilder]$secureWipe = New-Object System.Text.StringBuilder($staticOTP.Length)
+            $staticOTP.ToCharArray() | ForEach-Object { [void]$secureWipe.Append('X') }
+            $staticOTP = $secureWipe.ToString()
+        } catch {
+            $staticOTP = $null
+        }
     }
-}
+
     $passwordBox.Clear()
     $saveButton.Enabled = $true
+}
+
+
+$saveButton.Add_Click({
+    $staticOTP = $passwordBox.Text
+    Save-StaticPassword -staticOTP $staticOTP
 })
 
-# Paste Password button click handler
 $pasteButton.Add_Click({
     try {
         $passwordBox.Text = [System.Windows.Forms.Clipboard]::GetText()
         $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Password pasted from clipboard.`r`n")
+        $staticOTP = $passwordBox.Text
+        Save-StaticPassword -staticOTP $staticOTP
     } catch {
-        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Failed to paste password: $($_.Exception.Message)`r`n")
+        $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Failed to paste and save password: $($_.Exception.Message)`r`n")
     }
 })
 
-# Clear Clipboard button click handler
 $clearClipboardButton.Add_Click({
     try {
         [System.Windows.Forms.Clipboard]::Clear()
@@ -290,7 +336,6 @@ $clearClipboardButton.Add_Click({
     }
 })
 
-# Info button click handler
 $infoButton.Add_Click({
     $logBox.Clear()
     $logBox.AppendText("[$(Get-Date -Format 'HH:mm:ss')] Fetching YubiKey device info...`r`n")
@@ -324,8 +369,7 @@ $infoButton.Add_Click({
     }
 })
 
-# Exit button click handler
 $exitButton.Add_Click({ $form.Close() })
 
-# Show form
 [void]$form.ShowDialog()
+
