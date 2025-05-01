@@ -80,3 +80,19 @@ Saving a **static OTP** or **static password** onto a YubiKey carries inherent s
 4. If your system restricts script execution, run the script with a temporary policy bypass:
    ```powershell
    powershell.exe -ExecutionPolicy Bypass -File .\Set-YubiKeyslot2OTPGUIv1.2.ps1
+
+## 🧱 EXE Version (Portable App)
+
+A portable `.exe` version of the script is available for users who prefer a double-clickable app experience. This version was packaged using the open-source tool [`PS2EXE`](https://github.com/MScholtes/PS2EXE), which wraps the PowerShell script into a self-contained Windows executable.
+
+> **⚠️ Important Note:**  
+> Because the `.exe` is not digitally signed, **Windows SmartScreen or Defender may block it or show a warning**. This is expected behavior for unsigned executables.  
+> 
+> To run the application:
+> - Right-click the `.exe` and select **Properties**
+> - Check the box for **Unblock** at the bottom (if it appears)
+> - Click **Apply**, then **OK**
+> - Run the `.exe`, and if prompted by SmartScreen, click **"More info" → "Run anyway"**
+
+While this `.exe` is functionally identical to the PowerShell script, it provides a cleaner end-user experience without launching a console window.
+
