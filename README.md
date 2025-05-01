@@ -3,6 +3,11 @@
 A PowerShell GUI wrapper for securely setting a static OTP (one-time password) on a YubiKey slot using Yubico's `ykman` command-line tool. 
 ---
 
+## PowerShell Code
+- This code can be improved on a lot and could use some more work. It was made with a single purpose/use case since Yubico will deprecate its GUI offering soon. Some users just like a GUI, and terminals scare them 😅. 
+
+---
+
 ## 📖 Full Description
 
 **Set-YubiKeyStaticOTP** is a Windows PowerShell script that provides a graphical user interface (GUI) for setting a static OTP/password onto YubiKey slot 2 using the Yubico `ykman` CLI.
@@ -43,10 +48,6 @@ Saving a **static OTP** or **static password** onto a YubiKey carries inherent s
   - Avoid saving OTPs or static passwords on YubiKeys used for very high-risk, highly privileged, or externally exposed accounts.
 
 > While these mitigations reduce the risk, **the risk cannot be eliminated entirely**.
-
----
-## PowerShell Code
-- This code can be improved on a lot. I left it Initially verbose for now. 
 
 ---
 
